@@ -1,15 +1,18 @@
 import { version } from "../../package.json";
+import { t } from "../locales";
 
 export const BaseHtml = ({
   children,
   title = "ConvertX",
   webroot = "",
+  locale = "en",
 }: {
   children: JSX.Element;
   title?: string;
   webroot?: string;
+  locale?: string;
 }) => (
-  <html lang="en">
+  <html lang={locale}>
     <head>
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -25,7 +28,7 @@ export const BaseHtml = ({
       {children}
       <footer class="w-full">
         <div class="p-4 text-center text-sm text-neutral-500">
-          <span>Powered by </span>
+          <span>{t("common.poweredBy", locale)} </span>
           <a
             href="https://github.com/C4illin/ConvertX"
             class={`
