@@ -3,6 +3,7 @@ import { Elysia, t } from "elysia";
 import { outputDir, uploadsDir } from "..";
 import db from "../db/db";
 import { WEBROOT } from "../helpers/env";
+import { t, detectLocale } from "../locales";
 import { userService } from "./user";
 import { Jobs } from "../db/types";
 
@@ -40,12 +41,13 @@ export const deleteJob = new Elysia()
   )
   .post(
     "/delete-multiple",
-    async ({ body, user, set }) => {
+    async ({ body, user, set, headers, cookie: { locale } }) => {
+      const userLocale = detectLocale(headers["accept-language"], locale?.value);
       const { jobIds } = body;
 
       if (!Array.isArray(jobIds) || jobIds.length === 0) {
         set.status = 400;
-        return { success: false, message: "Invalid job IDs provided" };
+        return { success: false, message: t("errors.invalidJobIds", userLocale) };
       }
 
       const results = {
