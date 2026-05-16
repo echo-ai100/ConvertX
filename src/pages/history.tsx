@@ -1,10 +1,10 @@
-import { Elysia } from "elysia";
+import { Elysia, t } from "elysia";
 import { BaseHtml } from "../components/base";
 import { Header } from "../components/header";
 import db from "../db/db";
 import { Filename, Jobs } from "../db/types";
 import { ALLOW_UNAUTHENTICATED, HIDE_HISTORY, LANGUAGE, TIMEZONE, WEBROOT } from "../helpers/env";
-import { t, detectLocale } from "../locales";
+import { t as translate, detectLocale } from "../locales";
 import { userService } from "./user";
 import { EyeIcon } from "../icons/eye";
 import { DeleteIcon } from "../icons/delete";
@@ -34,9 +34,9 @@ export const history = new Elysia().use(userService).get(
     // Filter out jobs with no files
     userJobs = userJobs.filter((job) => job.num_files > 0);
 
-    const confirmMsg = t("history.confirmDelete", userLocale, { count: "${jobIds.length}" });
-    const successMsg = t("history.deleteSuccess", userLocale, { count: "${result.deleted}", failed: "${result.failed > 0 ? ` + '`' + ` Failed to delete ${result.failed} job(s).` + '`' + ` : ''}" });
-    const errorMsg = t("history.deleteError", userLocale);
+    const confirmMsg = translate("history.confirmDelete", userLocale, { count: "${jobIds.length}" });
+    const successMsg = translate("history.deleteSuccess", userLocale, { count: "${result.deleted}", failed: "${result.failed > 0 ? ` + '`' + ` Failed to delete ${result.failed} job(s).` + '`' + ` : ''}" });
+    const errorMsg = translate("history.deleteError", userLocale);
 
     return (
       <BaseHtml webroot={WEBROOT} title="ConvertX | Results" locale={userLocale}>
@@ -56,7 +56,7 @@ export const history = new Elysia().use(userService).get(
           >
             <article class="article">
               <div class="mb-4 flex items-center justify-between">
-                <h1 class="text-xl">{t("history.title", userLocale)}</h1>
+                <h1 class="text-xl">{translate("history.title", userLocale)}</h1>
                 <div id="delete-selected-container">
                   <button
                     id="delete-selected-btn"
@@ -68,7 +68,7 @@ export const history = new Elysia().use(userService).get(
                   >
                     <DeleteIcon />{" "}
                     <span>
-                      {t("history.deleteSelected", userLocale)} (<span id="selected-count">0</span>)
+                      {translate("history.deleteSelected", userLocale)} (<span id="selected-count">0</span>)
                     </span>
                   </button>
                 </div>
@@ -109,7 +109,7 @@ export const history = new Elysia().use(userService).get(
                         sm:px-4
                       `}
                     >
-                      {t("history.time", userLocale)}
+                      {translate("history.time", userLocale)}
                     </th>
                     <th
                       class={`
@@ -117,7 +117,7 @@ export const history = new Elysia().use(userService).get(
                         sm:px-4
                       `}
                     >
-                      {t("history.files", userLocale)}
+                      {translate("history.files", userLocale)}
                     </th>
                     <th
                       class={`
@@ -126,7 +126,7 @@ export const history = new Elysia().use(userService).get(
                         sm:px-4
                       `}
                     >
-                      {t("history.filesDone", userLocale)}
+                      {translate("history.filesDone", userLocale)}
                     </th>
                     <th
                       class={`
@@ -134,7 +134,7 @@ export const history = new Elysia().use(userService).get(
                         sm:px-4
                       `}
                     >
-                      {t("history.status", userLocale)}
+                      {translate("history.status", userLocale)}
                     </th>
                     <th
                       class={`
@@ -142,7 +142,7 @@ export const history = new Elysia().use(userService).get(
                         sm:px-4
                       `}
                     >
-                      {t("history.actions", userLocale)}
+                      {translate("history.actions", userLocale)}
                     </th>
                   </tr>
                 </thead>
@@ -207,7 +207,7 @@ export const history = new Elysia().use(userService).get(
                       <tr id={`details-${job.id}`} class="hidden">
                         <td colspan="7">
                           <div class="p-2 text-sm text-neutral-500">
-                            <div class="mb-1 font-semibold">{t("history.fileDetails", userLocale)}</div>
+                            <div class="mb-1 font-semibold">{translate("history.fileDetails", userLocale)}</div>
                             {job.files_detailed.map((file: Filename) => (
                               <div class="flex items-center">
                                 <span class="w-5/12 truncate" title={file.file_name} safe>

@@ -3,7 +3,7 @@ import { Elysia, t } from "elysia";
 import { outputDir, uploadsDir } from "..";
 import db from "../db/db";
 import { WEBROOT } from "../helpers/env";
-import { t, detectLocale } from "../locales";
+import { t as translate, detectLocale } from "../locales";
 import { userService } from "./user";
 import { Jobs } from "../db/types";
 
@@ -47,7 +47,7 @@ export const deleteJob = new Elysia()
 
       if (!Array.isArray(jobIds) || jobIds.length === 0) {
         set.status = 400;
-        return { success: false, message: t("errors.invalidJobIds", userLocale) };
+        return { success: false, message: translate("errors.invalidJobIds", userLocale) };
       }
 
       const results = {

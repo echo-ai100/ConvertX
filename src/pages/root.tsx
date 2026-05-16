@@ -14,7 +14,7 @@ import {
   UNAUTHENTICATED_USER_SHARING,
   WEBROOT,
 } from "../helpers/env";
-import { t, detectLocale } from "../locales";
+import { t as translate, detectLocale } from "../locales";
 import { FIRST_RUN, userService } from "./user";
 
 export const root = new Elysia().use(userService).get(
@@ -125,7 +125,7 @@ export const root = new Elysia().use(userService).get(
             `}
           >
             <article class="article">
-              <h1 class="mb-4 text-xl">{t("home.title", userLocale)}</h1>
+              <h1 class="mb-4 text-xl">{translate("home.title", userLocale)}</h1>
               <div class="mb-4 scrollbar-thin max-h-[50vh] overflow-y-auto">
                 <table
                   id="file-list"
@@ -146,7 +146,9 @@ export const root = new Elysia().use(userService).get(
                   [&.dragover]:border-4 [&.dragover]:border-neutral-500
                 `}
               >
-                <span innerHTML={t("home.dropzone", userLocale)} />
+                <span>
+                  <b>{translate("home.chooseFile", userLocale)}</b> {translate("home.orDrag", userLocale)}
+                </span>
                 <input
                   type="file"
                   name="file"
@@ -165,7 +167,7 @@ export const root = new Elysia().use(userService).get(
                 <input
                   type="search"
                   name="convert_to_search"
-                  placeholder={t("home.searchPlaceholder", userLocale)}
+                  placeholder={translate("home.searchPlaceholder", userLocale)}
                   autocomplete="off"
                   class="w-full rounded-sm bg-neutral-800 p-4"
                 />
@@ -211,9 +213,9 @@ export const root = new Elysia().use(userService).get(
                   </article>
 
                   {/* Hidden element which determines the format to convert the file too and the converter to use */}
-                  <select name="convert_to" aria-label={t("home.convertTo", userLocale)} required hidden>
+                  <select name="convert_to" aria-label={translate("home.convertTo", userLocale)} required hidden>
                     <option selected disabled value="">
-                      {t("home.convertTo", userLocale)}
+                      {translate("home.convertTo", userLocale)}
                     </option>
                     {Object.entries(getAllTargets()).map(([converter, targets]) => (
                       <optgroup label={converter}>
@@ -233,7 +235,7 @@ export const root = new Elysia().use(userService).get(
                   disabled:cursor-not-allowed disabled:opacity-50
                 `}
                 type="submit"
-                value={t("home.convertButton", userLocale)}
+                value={translate("home.convertButton", userLocale)}
                 disabled
               />
             </form>

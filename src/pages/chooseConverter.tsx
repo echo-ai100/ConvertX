@@ -1,6 +1,6 @@
 import Elysia, { t } from "elysia";
 import { getPossibleTargets } from "../converters/main";
-import { t, detectLocale } from "../locales";
+import { t as translate, detectLocale } from "../locales";
 import { userService } from "./user";
 
 export const chooseConverter = new Elysia().use(userService).post(
@@ -48,9 +48,9 @@ export const chooseConverter = new Elysia().use(userService).post(
           ))}
         </article>
 
-        <select name="convert_to" aria-label={t("home.convertTo", userLocale)} required hidden>
+        <select name="convert_to" aria-label={translate("home.convertTo", userLocale)} required hidden>
           <option selected disabled value="">
-            {t("home.convertTo", userLocale)}
+            {translate("home.convertTo", userLocale)}
           </option>
           {Object.entries(getPossibleTargets(body.fileType)).map(([converter, targets]) => (
             <optgroup label={converter}>

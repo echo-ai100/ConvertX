@@ -29,7 +29,8 @@ const enDefaults: Record<string, string> = {
   "nav.login": "Login",
   "nav.register": "Register",
   "home.title": "Convert",
-  "home.dropzone": "<b>Choose a file</b> or drag it here",
+  "home.chooseFile": "Choose a file",
+  "home.orDrag": "or drag it here",
   "home.searchPlaceholder": "Search for conversions",
   "home.convertButton": "Convert",
   "home.convertTo": "Convert to",
@@ -90,12 +91,15 @@ export function t(key: string, locale: string, vars?: Record<string, string | nu
   return text;
 }
 
-export function detectLocale(acceptLanguage: string | null, cookieLocale: string | null): string {
-  if (cookieLocale && (cookieLocale === "en" || cookieLocale === "zh-CN")) {
-    return cookieLocale;
+export function detectLocale(acceptLanguage: unknown, cookieLocale: unknown): string {
+  const acceptLang = typeof acceptLanguage === "string" ? acceptLanguage : null;
+  const cookieLang = typeof cookieLocale === "string" ? cookieLocale : null;
+
+  if (cookieLang && (cookieLang === "en" || cookieLang === "zh-CN")) {
+    return cookieLang;
   }
 
-  if (acceptLanguage?.toLowerCase().includes("zh-cn")) {
+  if (acceptLang?.toLowerCase().includes("zh-cn")) {
     return "zh-CN";
   }
 

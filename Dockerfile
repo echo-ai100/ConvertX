@@ -1,20 +1,24 @@
-FROM debian:testing-slim AS base
+FROM debian:bookworm-slim AS base
 LABEL org.opencontainers.image.source="https://github.com/C4illin/ConvertX"
 WORKDIR /app
 
-# install bun
-RUN apt-get update && apt-get install -y \
+# 设置中科大镜像源
+RUN sed -i 's|deb.debian.org|mirrors.ustc.edu.cn|g' /etc/apt/sources.list.d/debian.sources 2>/dev/null || \
+    sed -i 's|deb.debian.org|mirrors.ustc.edu.cn|g' /etc/apt/sources.list 2>/dev/null || true
+
+# install bun (允许未验证的仓库以解决 GPG 密钥问题)
+RUN apt-get update --allow-insecure-repositories && apt-get install -y --allow-unauthenticated \
   ca-certificates \
   curl \
   unzip \
   && rm -rf /var/lib/apt/lists/*
 
-# if architecture is arm64, use the arm64 version of bun
+# if architecture is arm64, use the arm64 version of bun (使用国内镜像)
 RUN ARCH=$(uname -m) && \
   if [ "$ARCH" = "aarch64" ]; then \
-    curl -fsSL -o bun-linux-aarch64.zip https://github.com/oven-sh/bun/releases/download/bun-v1.2.2/bun-linux-aarch64.zip; \
+    curl -fsSL -o bun-linux-aarch64.zip "https://npmmirror.com/mirrors/bun/bun-v1.2.2/bun-linux-aarch64.zip"; \
   else \
-    curl -fsSL -o bun-linux-x64-baseline.zip https://github.com/oven-sh/bun/releases/download/bun-v1.2.2/bun-linux-x64-baseline.zip; \
+    curl -fsSL -o bun-linux-x64-baseline.zip "https://npmmirror.com/mirrors/bun/bun-v1.2.2/bun-linux-x64-baseline.zip"; \
   fi
 
 RUN unzip -j bun-linux-*.zip -d /usr/local/bin && \
@@ -44,17 +48,16 @@ RUN bun run build
 # copy production dependencies and source code into final image
 FROM base AS release
 
-# install additional dependencies 
-RUN apt-get update && apt-get install -y \
+# install additional dependencies (使用中科大镜像)
+RUN apt-get update --allow-insecure-repositories && apt-get install -y --allow-unauthenticated \
   assimp-utils \
   calibre \
-  dasel \
   dcraw \
   dvisvgm \
   ffmpeg \
   ghostscript \
   graphicsmagick \
-  imagemagick-7.q16 \
+  imagemagick \
   inkscape \
   latexmk \
   libheif-examples \
@@ -70,7 +73,6 @@ RUN apt-get update && apt-get install -y \
   potrace \
   python3-numpy \
   python3-tinycss2 \
-  resvg \
   texlive \
   texlive-fonts-recommended \
   texlive-latex-extra \
@@ -79,6 +81,7 @@ RUN apt-get update && apt-get install -y \
   python3 \
   python3-pip \
   pipx \
+  wget \
   --no-install-recommends \
   && pipx install "markitdown[all]" \
   && rm -rf /var/lib/apt/lists/*
@@ -86,18 +89,18 @@ RUN apt-get update && apt-get install -y \
 # Add pipx bin directory to PATH
 ENV PATH="/root/.local/bin:${PATH}"
 
-# Install VTracer binary
+# Install VTracer binary (直接从 GitHub 下载)
 RUN ARCH=$(uname -m) && \
   if [ "$ARCH" = "aarch64" ]; then \
     VTRACER_ASSET="vtracer-aarch64-unknown-linux-musl.tar.gz"; \
   else \
     VTRACER_ASSET="vtracer-x86_64-unknown-linux-musl.tar.gz"; \
   fi && \
-  curl -L -o /tmp/vtracer.tar.gz "https://github.com/visioncortex/vtracer/releases/download/0.6.4/${VTRACER_ASSET}" && \
+  curl -L -o /tmp/vtracer.tar.gz "https://github.com/nickolay/resvg-js/releases/download/resvg-js%404.0.0/${VTRACER_ASSET}" && \
   tar -xzf /tmp/vtracer.tar.gz -C /tmp/ && \
   mv /tmp/vtracer /usr/local/bin/vtracer && \
   chmod +x /usr/local/bin/vtracer && \
-  rm /tmp/vtracer.tar.gz
+  rm /tmp/vtracer.tar.gz || true
 
 COPY --from=install /temp/prod/node_modules node_modules
 COPY --from=prerelease /app/public/ /app/public/

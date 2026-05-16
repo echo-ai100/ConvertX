@@ -4,7 +4,7 @@ import { Header } from "../components/header";
 import db from "../db/db";
 import { Filename, Jobs } from "../db/types";
 import { ALLOW_UNAUTHENTICATED, WEBROOT } from "../helpers/env";
-import { t, detectLocale } from "../locales";
+import { t as translate, detectLocale } from "../locales";
 import { DownloadIcon } from "../icons/download";
 import { DeleteIcon } from "../icons/delete";
 import { EyeIcon } from "../icons/eye";
@@ -24,7 +24,7 @@ function ResultsArticle({
   return (
     <article class="article">
       <div class="mb-4 flex items-center justify-between">
-        <h1 class="text-xl">{t("results.title", locale)}</h1>
+        <h1 class="text-xl">{translate("results.title", locale)}</h1>
         <div class="flex flex-row gap-4">
           <a
             style={files.length !== job.num_files ? "pointer-events: none;" : ""}
@@ -32,7 +32,7 @@ function ResultsArticle({
             href={`${WEBROOT}/delete/${job.id}`}
             {...(files.length !== job.num_files ? { disabled: true, "aria-busy": "true" } : "")}
           >
-            <DeleteIcon /> <p>{t("results.delete", locale)}</p>
+            <DeleteIcon /> <p>{translate("results.delete", locale)}</p>
           </a>
           <a
             style={files.length !== job.num_files ? "pointer-events: none;" : ""}
@@ -41,10 +41,10 @@ function ResultsArticle({
             class="flex btn-primary flex-row gap-2 text-contrast"
             {...(files.length !== job.num_files ? { disabled: true, "aria-busy": "true" } : "")}
           >
-            <DownloadIcon /> <p>{t("results.downloadTar", locale)}</p>
+            <DownloadIcon /> <p>{translate("results.downloadTar", locale)}</p>
           </a>
           <button class="flex btn-primary flex-row gap-2 text-contrast" onclick="downloadAll()">
-            <DownloadIcon /> <p>{t("results.downloadAll", locale)}</p>
+            <DownloadIcon /> <p>{translate("results.downloadAll", locale)}</p>
           </button>
         </div>
       </div>
@@ -75,7 +75,7 @@ function ResultsArticle({
                 sm:px-4
               `}
             >
-              {t("results.fileName", locale)}
+              {translate("results.fileName", locale)}
             </th>
             <th
               class={`
@@ -83,7 +83,7 @@ function ResultsArticle({
                 sm:px-4
               `}
             >
-              {t("results.status", locale)}
+              {translate("results.status", locale)}
             </th>
             <th
               class={`
@@ -91,7 +91,7 @@ function ResultsArticle({
                 sm:px-4
               `}
             >
-              {t("results.actions", locale)}
+              {translate("results.actions", locale)}
             </th>
           </tr>
         </thead>
@@ -151,7 +151,7 @@ export const results = new Elysia()
       if (!job) {
         set.status = 404;
         return {
-          message: t("errors.jobNotFound", userLocale),
+          message: translate("errors.jobNotFound", userLocale),
         };
       }
 
@@ -204,7 +204,7 @@ export const results = new Elysia()
       if (!job) {
         set.status = 404;
         return {
-          message: t("errors.jobNotFound", userLocale),
+          message: translate("errors.jobNotFound", userLocale),
         };
       }
 
