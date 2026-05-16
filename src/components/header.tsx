@@ -1,15 +1,19 @@
+import { t } from "../locales";
+
 export const Header = ({
   loggedIn,
   accountRegistration,
   allowUnauthenticated,
   hideHistory,
   webroot = "",
+  locale = "en",
 }: {
   loggedIn?: boolean;
   accountRegistration?: boolean;
   allowUnauthenticated?: boolean;
   hideHistory?: boolean;
   webroot?: string;
+  locale?: string;
 }) => {
   let rightNav: JSX.Element;
   if (loggedIn) {
@@ -24,7 +28,7 @@ export const Header = ({
               `}
               href={`${webroot}/history`}
             >
-              History
+              {t("nav.history", locale)}
             </a>
           </li>
         )}
@@ -37,7 +41,7 @@ export const Header = ({
               `}
               href={`${webroot}/account`}
             >
-              Account
+              {t("nav.account", locale)}
             </a>
           </li>
         ) : null}
@@ -50,10 +54,31 @@ export const Header = ({
               `}
               href={`${webroot}/logoff`}
             >
-              Logout
+              {t("nav.logout", locale)}
             </a>
           </li>
         ) : null}
+        <li class="flex gap-1">
+          <a
+            class={`
+              ${locale === "en" ? "text-accent-400 font-bold" : "text-neutral-500"}
+              hover:text-accent-500
+            `}
+            href={`${webroot}/locale/en`}
+          >
+            EN
+          </a>
+          <span class="text-neutral-600">|</span>
+          <a
+            class={`
+              ${locale === "zh-CN" ? "text-accent-400 font-bold" : "text-neutral-500"}
+              hover:text-accent-500
+            `}
+            href={`${webroot}/locale/zh-CN`}
+          >
+            中文
+          </a>
+        </li>
       </ul>
     );
   } else {
@@ -67,7 +92,7 @@ export const Header = ({
             `}
             href={`${webroot}/login`}
           >
-            Login
+            {t("nav.login", locale)}
           </a>
         </li>
         {accountRegistration ? (
@@ -79,10 +104,31 @@ export const Header = ({
               `}
               href={`${webroot}/register`}
             >
-              Register
+              {t("nav.register", locale)}
             </a>
           </li>
         ) : null}
+        <li class="flex gap-1">
+          <a
+            class={`
+              ${locale === "en" ? "text-accent-400 font-bold" : "text-neutral-500"}
+              hover:text-accent-500
+            `}
+            href={`${webroot}/locale/en`}
+          >
+            EN
+          </a>
+          <span class="text-neutral-600">|</span>
+          <a
+            class={`
+              ${locale === "zh-CN" ? "text-accent-400 font-bold" : "text-neutral-500"}
+              hover:text-accent-500
+            `}
+            href={`${webroot}/locale/zh-CN`}
+          >
+            中文
+          </a>
+        </li>
       </ul>
     );
   }
