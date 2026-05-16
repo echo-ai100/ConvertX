@@ -12,6 +12,7 @@ import {
   HTTP_ALLOWED,
   WEBROOT,
 } from "../helpers/env";
+import { t, detectLocale } from "../locales";
 
 export let FIRST_RUN = db.query("SELECT * FROM users").get() === null || false;
 
@@ -38,8 +39,12 @@ export const userService = new Elysia({ name: "user/service" })
     optionalSession: t.Cookie({
       auth: t.Optional(t.String()),
       jobId: t.Optional(t.String()),
+      locale: t.Optional(t.String()),
     }),
   })
+  .derive(({ headers, cookie: { locale } }) => ({
+    userLocale: detectLocale(headers["accept-language"], locale?.value),
+  }))
   .macro("auth", {
     cookie: "session",
     async resolve({ status, jwt, cookie: { auth } }) {
@@ -65,51 +70,51 @@ export const userService = new Elysia({ name: "user/service" })
 
 export const user = new Elysia()
   .use(userService)
-  .get("/setup", ({ redirect }) => {
+  .get("/setup", ({ redirect, userLocale }) => {
     if (!FIRST_RUN) {
       return redirect(`${WEBROOT}/login`, 302);
     }
 
     return (
-      <BaseHtml title="ConvertX | Setup" webroot={WEBROOT}>
+      <BaseHtml title="ConvertX | Setup" webroot={WEBROOT} locale={userLocale}>
         <main
           class={`
             mx-auto w-full max-w-4xl flex-1 px-2
             sm:px-4
           `}
         >
-          <h1 class="my-8 text-3xl">Welcome to ConvertX!</h1>
+          <h1 class="my-8 text-3xl">{t("auth.welcome", userLocale)}</h1>
           <article class="article p-0">
-            <header class="w-full bg-neutral-800 p-4">Create your account</header>
+            <header class="w-full bg-neutral-800 p-4">{t("auth.setup", userLocale)}</header>
             <form method="post" action={`${WEBROOT}/register`} class="p-4">
               <fieldset class="mb-4 flex flex-col gap-4">
                 <label class="flex flex-col gap-1">
-                  Email
+                  {t("account.email", userLocale)}
                   <input
                     type="email"
                     name="email"
                     class="rounded-sm bg-neutral-800 p-3"
-                    placeholder="Email"
+                    placeholder={t("auth.emailPlaceholder", userLocale)}
                     autocomplete="email"
                     required
                   />
                 </label>
                 <label class="flex flex-col gap-1">
-                  Password
+                  {t("account.password", userLocale)}
                   <input
                     type="password"
                     name="password"
                     class="rounded-sm bg-neutral-800 p-3"
-                    placeholder="Password"
+                    placeholder={t("auth.passwordPlaceholder", userLocale)}
                     autocomplete="current-password"
                     required
                   />
                 </label>
               </fieldset>
-              <input type="submit" value="Create account" class="btn-primary" />
+              <input type="submit" value={t("auth.setup", userLocale)} class="btn-primary" />
             </form>
             <footer class="p-4">
-              Report any issues on{" "}
+              {t("common.reportIssues", userLocale)}{" "}
               <a
                 class={`
                   text-accent-500 underline
@@ -126,19 +131,20 @@ export const user = new Elysia()
       </BaseHtml>
     );
   })
-  .get("/register", ({ redirect }) => {
+  .get("/register", ({ redirect, userLocale }) => {
     if (!ACCOUNT_REGISTRATION) {
       return redirect(`${WEBROOT}/login`, 302);
     }
 
     return (
-      <BaseHtml webroot={WEBROOT} title="ConvertX | Register">
+      <BaseHtml webroot={WEBROOT} title="ConvertX | Register" locale={userLocale}>
         <>
           <Header
             webroot={WEBROOT}
             accountRegistration={ACCOUNT_REGISTRATION}
             allowUnauthenticated={ALLOW_UNAUTHENTICATED}
             hideHistory={HIDE_HISTORY}
+            locale={userLocale}
           />
           <main
             class={`
@@ -150,29 +156,29 @@ export const user = new Elysia()
               <form method="post" class="flex flex-col gap-4">
                 <fieldset class="mb-4 flex flex-col gap-4">
                   <label class="flex flex-col gap-1">
-                    Email
+                    {t("account.email", userLocale)}
                     <input
                       type="email"
                       name="email"
                       class="rounded-sm bg-neutral-800 p-3"
-                      placeholder="Email"
+                      placeholder={t("auth.emailPlaceholder", userLocale)}
                       autocomplete="email"
                       required
                     />
                   </label>
                   <label class="flex flex-col gap-1">
-                    Password
+                    {t("account.password", userLocale)}
                     <input
                       type="password"
                       name="password"
                       class="rounded-sm bg-neutral-800 p-3"
-                      placeholder="Password"
+                      placeholder={t("auth.passwordPlaceholder", userLocale)}
                       autocomplete="current-password"
                       required
                     />
                   </label>
                 </fieldset>
-                <input type="submit" value="Register" class="w-full btn-primary" />
+                <input type="submit" value={t("nav.register", userLocale)} class="w-full btn-primary" />
               </form>
             </article>
           </main>
@@ -237,7 +243,7 @@ export const user = new Elysia()
   )
   .get(
     "/login",
-    async ({ jwt, redirect, cookie: { auth } }) => {
+    async ({ jwt, redirect, cookie: { auth }, userLocale }) => {
       if (FIRST_RUN) {
         return redirect(`${WEBROOT}/setup`, 302);
       }
@@ -254,13 +260,14 @@ export const user = new Elysia()
       }
 
       return (
-        <BaseHtml webroot={WEBROOT} title="ConvertX | Login">
+        <BaseHtml webroot={WEBROOT} title="ConvertX | Login" locale={userLocale}>
           <>
             <Header
               webroot={WEBROOT}
               accountRegistration={ACCOUNT_REGISTRATION}
               allowUnauthenticated={ALLOW_UNAUTHENTICATED}
               hideHistory={HIDE_HISTORY}
+              locale={userLocale}
             />
             <main
               class={`
@@ -272,23 +279,23 @@ export const user = new Elysia()
                 <form method="post" class="flex flex-col gap-4">
                   <fieldset class="mb-4 flex flex-col gap-4">
                     <label class="flex flex-col gap-1">
-                      Email
+                      {t("account.email", userLocale)}
                       <input
                         type="email"
                         name="email"
                         class="rounded-sm bg-neutral-800 p-3"
-                        placeholder="Email"
+                        placeholder={t("auth.emailPlaceholder", userLocale)}
                         autocomplete="email"
                         required
                       />
                     </label>
                     <label class="flex flex-col gap-1">
-                      Password
+                      {t("account.password", userLocale)}
                       <input
                         type="password"
                         name="password"
                         class="rounded-sm bg-neutral-800 p-3"
-                        placeholder="Password"
+                        placeholder={t("auth.passwordPlaceholder", userLocale)}
                         autocomplete="current-password"
                         required
                       />
@@ -301,10 +308,10 @@ export const user = new Elysia()
                         role="button"
                         class="w-full btn-secondary text-center"
                       >
-                        Register
+                        {t("nav.register", userLocale)}
                       </a>
                     ) : null}
-                    <input type="submit" value="Login" class="w-full btn-primary" />
+                    <input type="submit" value={t("nav.login", userLocale)} class="w-full btn-primary" />
                   </div>
                 </form>
               </article>
@@ -376,7 +383,7 @@ export const user = new Elysia()
   })
   .get(
     "/account",
-    async ({ user, redirect }) => {
+    async ({ user, redirect, userLocale }) => {
       if (!user) {
         return redirect(`${WEBROOT}/`, 302);
       }
@@ -388,7 +395,7 @@ export const user = new Elysia()
       }
 
       return (
-        <BaseHtml webroot={WEBROOT} title="ConvertX | Account">
+        <BaseHtml webroot={WEBROOT} title="ConvertX | Account" locale={userLocale}>
           <>
             <Header
               webroot={WEBROOT}
@@ -396,6 +403,7 @@ export const user = new Elysia()
               allowUnauthenticated={ALLOW_UNAUTHENTICATED}
               hideHistory={HIDE_HISTORY}
               loggedIn
+              locale={userLocale}
             />
             <main
               class={`
@@ -407,41 +415,41 @@ export const user = new Elysia()
                 <form method="post" class="flex flex-col gap-4">
                   <fieldset class="mb-4 flex flex-col gap-4">
                     <label class="flex flex-col gap-1">
-                      Email
+                      {t("account.email", userLocale)}
                       <input
                         type="email"
                         name="email"
                         class="rounded-sm bg-neutral-800 p-3"
-                        placeholder="Email"
+                        placeholder={t("auth.emailPlaceholder", userLocale)}
                         autocomplete="email"
                         value={userData.email}
                         required
                       />
                     </label>
                     <label class="flex flex-col gap-1">
-                      Password (leave blank for unchanged)
+                      {t("account.newPassword", userLocale)}
                       <input
                         type="password"
                         name="newPassword"
                         class="rounded-sm bg-neutral-800 p-3"
-                        placeholder="Password"
+                        placeholder={t("auth.passwordPlaceholder", userLocale)}
                         autocomplete="new-password"
                       />
                     </label>
                     <label class="flex flex-col gap-1">
-                      Current Password
+                      {t("account.currentPassword", userLocale)}
                       <input
                         type="password"
                         name="password"
                         class="rounded-sm bg-neutral-800 p-3"
-                        placeholder="Password"
+                        placeholder={t("auth.passwordPlaceholder", userLocale)}
                         autocomplete="current-password"
                         required
                       />
                     </label>
                   </fieldset>
                   <div role="group">
-                    <input type="submit" value="Update" class="w-full btn-primary" />
+                    <input type="submit" value={t("account.update", userLocale)} class="w-full btn-primary" />
                   </div>
                 </form>
               </article>
