@@ -1,1 +1,118 @@
-{"nav": {"history": "历史记录", "account": "账户", "logout": "退出", "login": "登录", "register": "注册"}, "home": {"title": "转换", "chooseFile": "选择文件", "orDrag": "或拖放到此处", "searchPlaceholder": "搜索转换格式", "convertButton": "转换", "convertTo": "转换为"}, "history": {"title": "结果", "time": "时间", "files": "文件", "filesDone": "已完成", "status": "状态", "actions": "操作", "deleteSelected": "删除选中", "confirmDelete": "确定要删除 {count} 个任务吗？此操作无法撤销。", "deleteSuccess": "成功删除 {count} 个任务。{failed}", "deleteFailed": "删除 {count} 个任务失败。", "deleteError": "删除任务时出错，请重试。", "fileDetails": "文件详细信息："}, "results": {"title": "结果", "delete": "删除", "downloadTar": "打包下载", "downloadAll": "全部下载", "fileName": "文件名", "status": "状态", "actions": "操作"}, "account": {"title": "账户", "email": "邮箱", "password": "密码", "newPassword": "新密码（留空则不修改）", "currentPassword": "当前密码", "update": "更新"}, "auth": {"setup": "创建账户", "welcome": "欢迎使用 ConvertX！", "emailPlaceholder": "邮箱", "passwordPlaceholder": "密码"}, "common": {"poweredBy": "由", "reportIssues": "在 GitHub 上反馈问题"}, "errors": {"jobNotFound": "任务未找到。", "invalidJobIds": "提供的任务 ID 无效"}}
+{
+  "nav": {
+    "history": "历史记录",
+    "account": "账户",
+    "logout": "退出",
+    "login": "登录",
+    "register": "注册",
+    "credits": "积分",
+    "checkIn": "签到",
+    "referral": "邀请",
+    "admin": "管理"
+  },
+  "home": {
+    "title": "转换",
+    "chooseFile": "选择文件",
+    "orDrag": "或拖放到此处",
+    "searchPlaceholder": "搜索转换格式",
+    "convertButton": "转换",
+    "convertTo": "转换为"
+  },
+  "history": {
+    "title": "结果",
+    "time": "时间",
+    "files": "文件",
+    "filesDone": "已完成",
+    "status": "状态",
+    "actions": "操作",
+    "deleteSelected": "删除选中",
+    "confirmDelete": "确定要删除 {count} 个任务吗？此操作无法撤销。",
+    "deleteSuccess": "成功删除 {count} 个任务。{failed}",
+    "deleteFailed": "删除 {count} 个任务失败。",
+    "deleteError": "删除任务时出错，请重试。",
+    "fileDetails": "文件详细信息："
+  },
+  "results": {
+    "title": "结果",
+    "delete": "删除",
+    "downloadTar": "打包下载",
+    "downloadAll": "全部下载",
+    "fileName": "文件名",
+    "status": "状态",
+    "actions": "操作"
+  },
+  "account": {
+    "title": "账户",
+    "email": "邮箱",
+    "password": "密码",
+    "newPassword": "新密码（留空则不修改）",
+    "currentPassword": "当前密码",
+    "update": "更新"
+  },
+  "auth": {
+    "setup": "创建账户",
+    "welcome": "欢迎使用 ConvertX！",
+    "emailPlaceholder": "邮箱",
+    "passwordPlaceholder": "密码",
+    "verifyEmail": "验证邮箱",
+    "verifyCode": "验证码",
+    "verifyCodeSent": "已向 {email} 发送6位验证码",
+    "verifyCodeExpired": "验证码已过期",
+    "verifyCodeInvalid": "验证码无效",
+    "resendCode": "重新发送",
+    "referralCode": "邀请码（可选）"
+  },
+  "common": {
+    "poweredBy": "由",
+    "reportIssues": "在 GitHub 上反馈问题"
+  },
+  "errors": {
+    "jobNotFound": "任务未找到。",
+    "invalidJobIds": "提供的任务 ID 无效"
+  },
+  "credits": {
+    "title": "积分",
+    "balance": "当前余额",
+    "recharge": "充值",
+    "history": "交易记录",
+    "insufficient": "积分不足，请充值。",
+    "required": "需要积分：{amount}",
+    "charged": "已扣积分：{amount}",
+    "refunded": "已退积分：{amount}",
+    "amount": "金额",
+    "description": "描述",
+    "noHistory": "暂无交易记录",
+    "paymentHistory": "充值记录",
+    "amountRmb": "金额（元）",
+    "creditsGranted": "获得积分",
+    "checkIn": "签到",
+    "checkInDone": "今日已签到",
+    "checkInTomorrow": "明天再来领取奖励！",
+    "checkInReward": "每日签到可获得10积分！",
+    "checkInButton": "立即签到",
+    "checkInSuccess": "签到成功！+10积分",
+    "referral": "邀请",
+    "referralLink": "您的邀请链接",
+    "referralReward": "邀请新用户注册可获得100积分",
+    "referralCount": "邀请人数",
+    "referralEarned": "邀请奖励积分",
+    "copy": "复制"
+  },
+  "admin": {
+    "title": "管理后台",
+    "userCount": "用户总数",
+    "conversionCount": "转换总数",
+    "successCount": "成功转换",
+    "failCount": "失败转换",
+    "creditConsumed": "消耗积分",
+    "totalRevenue": "总收入（元）",
+    "systemLoad": "系统负载",
+    "memoryUsage": "内存使用",
+    "cpuLoad": "CPU负载",
+    "cpuCount": "CPU核心数",
+    "recentTransactions": "最近交易",
+    "recentUsers": "最近用户",
+    "role": "角色",
+    "noUsers": "暂无用户"
+  }
+}

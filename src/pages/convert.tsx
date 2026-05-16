@@ -5,13 +5,18 @@ import { outputDir, uploadsDir } from "..";
 import { handleConvert } from "../converters/main";
 import db from "../db/db";
 import { Jobs } from "../db/types";
-import { WEBROOT } from "../helpers/env";
+import { WEBROOT, BILLING_ENABLED } from "../helpers/env";
 import { normalizeFiletype } from "../helpers/normalizeFiletype";
 import { userService } from "./user";
+import { calculateJobCredits, deductCredits, refundCredits } from "../helpers/billing";
+import { BaseHtml } from "../components/base";
+import { Header } from "../components/header";
+import { ACCOUNT_REGISTRATION, ALLOW_UNAUTHENTICATED, HIDE_HISTORY } from "../helpers/env";
+import { t as translate, detectLocale } from "../locales";
 
 export const convert = new Elysia().use(userService).post(
   "/convert",
-  async ({ body, redirect, jwt, cookie: { auth, jobId } }) => {
+  async ({ body, redirect, jwt, cookie: { auth, jobId }, headers }) => {
     if (!auth?.value) {
       return redirect(`${WEBROOT}/login`, 302);
     }
@@ -66,6 +71,39 @@ export const convert = new Elysia().use(userService).post(
       return redirect(`${WEBROOT}/`, 302);
     }
 
+    // Billing check
+    if (BILLING_ENABLED) {
+      const requiredCredits = calculateJobCredits(fileNames, userUploadsDir);
+      const success = deductCredits(user.id, requiredCredits, jobId.value);
+      if (!success) {
+        const userLocale = detectLocale(headers["accept-language"], undefined);
+        return (
+          <BaseHtml webroot={WEBROOT} title="ConvertX | Insufficient Credits" locale={userLocale}>
+            <>
+              <Header
+                webroot={WEBROOT}
+                accountRegistration={ACCOUNT_REGISTRATION}
+                allowUnauthenticated={ALLOW_UNAUTHENTICATED}
+                hideHistory={HIDE_HISTORY}
+                loggedIn
+                locale={userLocale}
+              />
+              <main class="w-full flex-1 px-2 sm:px-4">
+                <article class="article">
+                  <h1 class="mb-4 text-xl">{translate("credits.insufficient", userLocale)}</h1>
+                  <p class="mb-4">{translate("credits.required", userLocale, { amount: String(requiredCredits) })}</p>
+                  <a href={`${WEBROOT}/credits`} class="btn-primary inline-block">
+                    {translate("credits.recharge", userLocale)}
+                  </a>
+                </article>
+              </main>
+            </>
+          </BaseHtml>
+        );
+      }
+      db.query("UPDATE jobs SET credits_charged = ? WHERE id = ?").run(requiredCredits, jobId.value);
+    }
+
     db.query("UPDATE jobs SET num_files = ?1, status = 'pending' WHERE id = ?2").run(
       fileNames.length,
       jobId.value,
@@ -84,6 +122,16 @@ export const convert = new Elysia().use(userService).post(
       })
       .catch((error) => {
         console.error("Error in conversion process:", error);
+        // Refund credits on failure
+        if (BILLING_ENABLED && jobId.value) {
+          const job = db.query("SELECT credits_charged FROM jobs WHERE id = ?").get(jobId.value) as {
+            credits_charged: number;
+          } | null;
+          if (job && job.credits_charged > 0) {
+            refundCredits(user.id, job.credits_charged, Number(jobId.value));
+          }
+          db.query("UPDATE jobs SET status = 'failed' WHERE id = ?").run(jobId.value);
+        }
       });
 
     // Redirect the client immediately

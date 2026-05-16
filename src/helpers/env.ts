@@ -12,6 +12,15 @@ export const AUTO_DELETE_EVERY_N_HOURS = process.env.AUTO_DELETE_EVERY_N_HOURS
 
 export const HIDE_HISTORY = process.env.HIDE_HISTORY?.toLowerCase() === "true" || false;
 
+export const ADMIN_EMAILS = process.env.ADMIN_EMAILS?.split(",").map((e) => e.trim().toLowerCase()) ?? [];
+export const SMTP_HOST = process.env.SMTP_HOST ?? "";
+export const SMTP_PORT = Number(process.env.SMTP_PORT) || 587;
+export const SMTP_USER = process.env.SMTP_USER ?? "";
+export const SMTP_PASS = process.env.SMTP_PASS ?? "";
+export const SMTP_FROM = process.env.SMTP_FROM ?? "ConvertX <noreply@convertx.com>";
+export const INITIAL_CREDITS = Number(process.env.INITIAL_CREDITS) || 0;
+export const BILLING_ENABLED = process.env.BILLING_ENABLED?.toLowerCase() === "true" || false;
+
 export const WEBROOT = process.env.WEBROOT ?? "";
 
 export const LANGUAGE = process.env.LANGUAGE?.toLowerCase() || "en";

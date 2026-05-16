@@ -19,6 +19,11 @@ import { upload } from "./pages/upload";
 import { user } from "./pages/user";
 import { healthcheck } from "./pages/healthcheck";
 import { locale } from "./pages/locale";
+import { emailVerification } from "./pages/emailVerification";
+import { credits } from "./pages/credits";
+import { checkIn } from "./pages/checkIn";
+import { referral } from "./pages/referral";
+import { admin } from "./pages/admin";
 
 export const uploadsDir = "./data/uploads/";
 export const outputDir = "./data/output/";
@@ -52,6 +57,11 @@ const app = new Elysia({
   .use(chooseConverter)
   .use(healthcheck)
   .use(locale)
+  .use(emailVerification)
+  .use(credits)
+  .use(checkIn)
+  .use(referral)
+  .use(admin)
   .onError(({ error }) => {
     console.error(error);
   });
@@ -98,3 +108,10 @@ const clearJobs = () => {
 if (AUTO_DELETE_EVERY_N_HOURS > 0) {
   clearJobs();
 }
+
+// Clear expired verification codes every hour
+const clearExpiredCodes = () => {
+  db.query("DELETE FROM email_verification_codes WHERE expires_at < ?").run(new Date().toISOString());
+  setTimeout(clearExpiredCodes, 60 * 60 * 1000);
+};
+clearExpiredCodes();

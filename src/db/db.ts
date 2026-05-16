@@ -37,6 +37,48 @@ if (dbVersion === 0) {
   console.log("Updated database to version 1.");
 }
 
+if (dbVersion === 1) {
+  db.exec(`
+    ALTER TABLE users ADD COLUMN credits INTEGER DEFAULT 0;
+    ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'user';
+    ALTER TABLE users ADD COLUMN email_verified INTEGER DEFAULT 0;
+    ALTER TABLE users ADD COLUMN referred_by INTEGER DEFAULT NULL;
+    ALTER TABLE users ADD COLUMN last_check_in TEXT DEFAULT NULL;
+    ALTER TABLE jobs ADD COLUMN credits_charged INTEGER DEFAULT 0;
+    CREATE TABLE IF NOT EXISTS credit_transactions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      amount INTEGER NOT NULL,
+      type TEXT NOT NULL,
+      reference_id INTEGER DEFAULT NULL,
+      description TEXT DEFAULT NULL,
+      date_created TEXT NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+    CREATE TABLE IF NOT EXISTS payments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
+      amount_rmb REAL NOT NULL,
+      credits_granted INTEGER NOT NULL,
+      payment_method TEXT NOT NULL,
+      payment_status TEXT DEFAULT 'pending',
+      transaction_id TEXT DEFAULT NULL,
+      date_created TEXT NOT NULL,
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    );
+    CREATE TABLE IF NOT EXISTS email_verification_codes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT NOT NULL,
+      code TEXT NOT NULL,
+      expires_at TEXT NOT NULL,
+      verified INTEGER DEFAULT 0,
+      date_created TEXT NOT NULL
+    );
+    PRAGMA user_version = 2;
+  `);
+  console.log("Updated database to version 2.");
+}
+
 // enable WAL mode
 db.exec("PRAGMA journal_mode = WAL;");
 

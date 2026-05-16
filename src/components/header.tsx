@@ -7,6 +7,7 @@ export const Header = ({
   hideHistory,
   webroot = "",
   locale = "en",
+  userRole = "user",
 }: {
   loggedIn?: boolean;
   accountRegistration?: boolean;
@@ -14,6 +15,7 @@ export const Header = ({
   hideHistory?: boolean;
   webroot?: string;
   locale?: string;
+  userRole?: string;
 }) => {
   let rightNav: JSX.Element;
   if (loggedIn) {
@@ -29,6 +31,52 @@ export const Header = ({
               href={`${webroot}/history`}
             >
               {t("nav.history", locale)}
+            </a>
+          </li>
+        )}
+        <li>
+          <a
+            class={`
+              text-accent-600 transition-all
+              hover:text-accent-500 hover:underline
+            `}
+            href={`${webroot}/credits`}
+          >
+            {t("nav.credits", locale)}
+          </a>
+        </li>
+        <li>
+          <a
+            class={`
+              text-accent-600 transition-all
+              hover:text-accent-500 hover:underline
+            `}
+            href={`${webroot}/check-in`}
+          >
+            {t("nav.checkIn", locale)}
+          </a>
+        </li>
+        <li>
+          <a
+            class={`
+              text-accent-600 transition-all
+              hover:text-accent-500 hover:underline
+            `}
+            href={`${webroot}/referral`}
+          >
+            {t("nav.referral", locale)}
+          </a>
+        </li>
+        {userRole === "admin" && (
+          <li>
+            <a
+              class={`
+                text-accent-600 transition-all
+                hover:text-accent-500 hover:underline
+              `}
+              href={`${webroot}/admin`}
+            >
+              {t("nav.admin", locale)}
             </a>
           </li>
         )}

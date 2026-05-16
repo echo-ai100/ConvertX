@@ -11,8 +11,11 @@ import {
   HIDE_HISTORY,
   HTTP_ALLOWED,
   WEBROOT,
+  INITIAL_CREDITS,
+  ADMIN_EMAILS,
 } from "../helpers/env";
 import { t as translate, detectLocale } from "../locales";
+import { sendVerificationCode, generateVerificationCode } from "../helpers/email";
 
 export let FIRST_RUN = db.query("SELECT * FROM users").get() === null || false;
 
@@ -131,9 +134,11 @@ export const user = new Elysia()
   })
   .get("/register", ({ redirect, headers, cookie: { locale } }) => {
     const userLocale = detectLocale(headers["accept-language"], locale?.value);
-    if (!ACCOUNT_REGISTRATION) {
+    if (!ACCOUNT_REGISTRATION && !FIRST_RUN) {
       return redirect(`${WEBROOT}/login`, 302);
     }
+
+    const refCode = new URLSearchParams(headers["referer"]?.split("?")[1] ?? "").get("ref") ?? "";
 
     return (
       <BaseHtml webroot={WEBROOT} title="ConvertX | Register" locale={userLocale}>
@@ -152,7 +157,7 @@ export const user = new Elysia()
             `}
           >
             <article class="article">
-              <form method="post" class="flex flex-col gap-4">
+              <form method="post" action={`${WEBROOT}/verify-email/send`} class="flex flex-col gap-4">
                 <fieldset class="mb-4 flex flex-col gap-4">
                   <label class="flex flex-col gap-1">
                     {translate("account.email", userLocale)}
@@ -172,8 +177,17 @@ export const user = new Elysia()
                       name="password"
                       class="rounded-sm bg-neutral-800 p-3"
                       placeholder={translate("auth.passwordPlaceholder", userLocale)}
-                      autocomplete="current-password"
+                      autocomplete="new-password"
                       required
+                    />
+                  </label>
+                  <label class="flex flex-col gap-1">
+                    {translate("auth.referralCode", userLocale)}
+                    <input
+                      type="text"
+                      name="referral_code"
+                      class="rounded-sm bg-neutral-800 p-3"
+                      value={refCode}
                     />
                   </label>
                 </fieldset>
@@ -203,9 +217,14 @@ export const user = new Elysia()
           message: "Email already in use.",
         };
       }
+
+      // For first user (setup), skip email verification
+      const isAdmin = ADMIN_EMAILS.includes(email.toLowerCase());
       const savedPassword = await Bun.password.hash(password);
 
-      db.query("INSERT INTO users (email, password) VALUES (?, ?)").run(email, savedPassword);
+      db.query(
+        "INSERT INTO users (email, password, credits, role, email_verified, referred_by, last_check_in) VALUES (?, ?, ?, ?, ?, NULL, NULL)"
+      ).run(email, savedPassword, INITIAL_CREDITS, isAdmin ? "admin" : "user", 1);
 
       const user = db.query("SELECT * FROM users WHERE email = ?").as(User).get(email);
 
