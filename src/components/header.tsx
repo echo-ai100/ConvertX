@@ -51,6 +51,17 @@ export const Header = ({
               text-accent-600 transition-all
               hover:text-accent-500 hover:underline
             `}
+            href={`${webroot}/recharge`}
+          >
+            {t("nav.recharge", locale)}
+          </a>
+        </li>
+        <li>
+          <a
+            class={`
+              text-accent-600 transition-all
+              hover:text-accent-500 hover:underline
+            `}
             href={`${webroot}/check-in`}
           >
             {t("nav.checkIn", locale)}

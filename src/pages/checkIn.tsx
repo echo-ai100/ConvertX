@@ -3,15 +3,11 @@ import { BaseHtml } from "../components/base";
 import { Header } from "../components/header";
 import db from "../db/db";
 import { User } from "../db/types";
-import {
-  ACCOUNT_REGISTRATION,
-  ALLOW_UNAUTHENTICATED,
-  HIDE_HISTORY,
-  WEBROOT,
-} from "../helpers/env";
+import { ACCOUNT_REGISTRATION, ALLOW_UNAUTHENTICATED, HIDE_HISTORY, WEBROOT } from "../helpers/env";
 import { userService } from "./user";
 import { t as translate, detectLocale } from "../locales";
-import { addCredits } from "../helpers/billing";
+import { isSameUtcDay, utcDateKey } from "../helpers/checkIn";
+import { recordCreditTransaction } from "../helpers/billing";
 
 export const checkIn = new Elysia()
   .use(userService)
@@ -29,9 +25,10 @@ export const checkIn = new Elysia()
       }
 
       // Check if already checked in today
-      const today = new Date().toISOString().split("T")[0];
-      const lastCheckIn = userData.last_check_in ? new Date(userData.last_check_in).toISOString().split("T")[0] : null;
-      const alreadyCheckedIn = lastCheckIn === today;
+      const now = new Date();
+      const alreadyCheckedIn = userData.last_check_in
+        ? isSameUtcDay(userData.last_check_in, now)
+        : false;
 
       return (
         <BaseHtml webroot={WEBROOT} title="ConvertX | Check In" locale={userLocale}>
@@ -43,6 +40,7 @@ export const checkIn = new Elysia()
               hideHistory={HIDE_HISTORY}
               loggedIn
               locale={userLocale}
+              userRole={userData.role}
             />
             <main class="w-full flex-1 px-2 sm:px-4">
               <article class="article">
@@ -50,7 +48,9 @@ export const checkIn = new Elysia()
                 {alreadyCheckedIn ? (
                   <div class="p-4 bg-neutral-800 rounded-sm">
                     <p class="text-lg">{translate("credits.checkInDone", userLocale)}</p>
-                    <p class="text-neutral-500 mt-2">{translate("credits.checkInTomorrow", userLocale)}</p>
+                    <p class="text-neutral-500 mt-2">
+                      {translate("credits.checkInTomorrow", userLocale)}
+                    </p>
                   </div>
                 ) : (
                   <form method="post" action={`${WEBROOT}/check-in`}>
@@ -82,17 +82,26 @@ export const checkIn = new Elysia()
       }
 
       // Check if already checked in today
-      const today = new Date().toISOString().split("T")[0];
-      const lastCheckIn = userData.last_check_in ? new Date(userData.last_check_in).toISOString().split("T")[0] : null;
+      const now = new Date();
+      const alreadyCheckedIn = userData.last_check_in
+        ? isSameUtcDay(userData.last_check_in, now)
+        : false;
 
-      if (lastCheckIn === today) {
+      if (alreadyCheckedIn) {
         return redirect(`${WEBROOT}/check-in`, 302);
       }
 
       // Perform check-in
-      const now = new Date().toISOString();
-      db.query("UPDATE users SET credits = credits + 10, last_check_in = ? WHERE id = ?").run(now, user.id);
-      addCredits(user.id, 10, "check_in", "Daily check-in reward", null);
+      const nowIso = now.toISOString();
+      const result = db
+        .query(
+          "UPDATE users SET credits = credits + 10, last_check_in = ? WHERE id = ? AND (last_check_in IS NULL OR substr(last_check_in, 1, 10) != ?)",
+        )
+        .run(nowIso, user.id, utcDateKey(now));
+      if (result.changes === 0) {
+        return redirect(`${WEBROOT}/check-in`, 302);
+      }
+      recordCreditTransaction(user.id, 10, "check_in", "Daily check-in reward", null);
 
       return redirect(`${WEBROOT}/check-in?success=true`, 302);
     },

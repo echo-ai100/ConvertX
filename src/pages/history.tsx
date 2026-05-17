@@ -3,11 +3,18 @@ import { BaseHtml } from "../components/base";
 import { Header } from "../components/header";
 import db from "../db/db";
 import { Filename, Jobs } from "../db/types";
-import { ALLOW_UNAUTHENTICATED, HIDE_HISTORY, LANGUAGE, TIMEZONE, WEBROOT } from "../helpers/env";
+import {
+  ALLOW_UNAUTHENTICATED,
+  HIDE_HISTORY,
+  LANGUAGE,
+  TIMEZONE,
+  WEBROOT,
+} from "../helpers/env";
 import { t as translate, detectLocale } from "../locales";
 import { userService } from "./user";
 import { EyeIcon } from "../icons/eye";
 import { DeleteIcon } from "../icons/delete";
+import { getUserRole } from "../helpers/userRole";
 
 export const history = new Elysia().use(userService).get(
   "/history",
@@ -34,8 +41,14 @@ export const history = new Elysia().use(userService).get(
     // Filter out jobs with no files
     userJobs = userJobs.filter((job) => job.num_files > 0);
 
-    const confirmMsg = translate("history.confirmDelete", userLocale, { count: "${jobIds.length}" });
-    const successMsg = translate("history.deleteSuccess", userLocale, { count: "${result.deleted}", failed: "${result.failed > 0 ? ` + '`' + ` Failed to delete ${result.failed} job(s).` + '`' + ` : ''}" });
+    const confirmMsg = translate("history.confirmDelete", userLocale, {
+      count: "${jobIds.length}",
+    });
+    const successTemplate = translate("history.deleteSuccess", userLocale, {
+      count: "${deleted}",
+      failed: "${failed}",
+    });
+    const failedTemplate = translate("history.deleteFailed", userLocale, { count: "${count}" });
     const errorMsg = translate("history.deleteError", userLocale);
 
     return (
@@ -47,6 +60,7 @@ export const history = new Elysia().use(userService).get(
             hideHistory={HIDE_HISTORY}
             loggedIn
             locale={userLocale}
+            userRole={getUserRole(user.id)}
           />
           <main
             class={`
@@ -55,9 +69,9 @@ export const history = new Elysia().use(userService).get(
             `}
           >
             <article class="article">
-              <div class="mb-4 flex items-center justify-between">
+              <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <h1 class="text-xl">{translate("history.title", userLocale)}</h1>
-                <div id="delete-selected-container">
+                <div id="delete-selected-container" class="self-start sm:self-auto">
                   <button
                     id="delete-selected-btn"
                     class={`
@@ -68,7 +82,8 @@ export const history = new Elysia().use(userService).get(
                   >
                     <DeleteIcon />{" "}
                     <span>
-                      {translate("history.deleteSelected", userLocale)} (<span id="selected-count">0</span>)
+                      {translate("history.deleteSelected", userLocale)} (
+                      <span id="selected-count">0</span>)
                     </span>
                   </button>
                 </div>
@@ -193,21 +208,26 @@ export const history = new Elysia().use(userService).get(
                           >
                             <EyeIcon />
                           </a>
-                          <a
-                            class={`
-                              text-accent-500 underline
-                              hover:text-accent-400
-                            `}
-                            href={`${WEBROOT}/delete/${job.id}`}
-                          >
-                            <DeleteIcon />
-                          </a>
+                          <form method="post" action={`${WEBROOT}/delete/${job.id}`}>
+                            <button
+                              class={`
+                                text-accent-500 underline
+                                hover:text-accent-400
+                              `}
+                              type="submit"
+                              title={translate("results.delete", userLocale)}
+                            >
+                              <DeleteIcon />
+                            </button>
+                          </form>
                         </td>
                       </tr>
                       <tr id={`details-${job.id}`} class="hidden">
                         <td colspan="7">
                           <div class="p-2 text-sm text-neutral-500">
-                            <div class="mb-1 font-semibold">{translate("history.fileDetails", userLocale)}</div>
+                            <div class="mb-1 font-semibold">
+                              {translate("history.fileDetails", userLocale)}
+                            </div>
                             {job.files_detailed.map((file: Filename) => (
                               <div class="flex items-center">
                                 <span class="w-5/12 truncate" title={file.file_name} safe>
@@ -323,7 +343,8 @@ export const history = new Elysia().use(userService).get(
                     const result = await response.json();
 
                     if (result.success || result.deleted > 0) {
-                      alert(\`${successMsg}\`);
+                      const failedText = result.failed > 0 ? \`${failedTemplate}\`.replace('\${count}', result.failed) : '';
+                      alert(\`${successTemplate}\`.replace('\${deleted}', result.deleted).replace('\${failed}', failedText));
                       window.location.reload();
                     } else {
                       alert(\`${errorMsg}\`);

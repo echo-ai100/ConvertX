@@ -3,15 +3,21 @@ import { BaseHtml } from "../components/base";
 import { Header } from "../components/header";
 import { getAllInputs, getAllTargets } from "../converters/main";
 import { ALLOW_UNAUTHENTICATED, WEBROOT } from "../helpers/env";
+import { getUserRole } from "../helpers/userRole";
 import { userService } from "./user";
 
 export const listConverters = new Elysia().use(userService).get(
   "/converters",
-  async () => {
+  async ({ user }: { user?: { id?: string | number } }) => {
     return (
       <BaseHtml webroot={WEBROOT} title="ConvertX | Converters">
         <>
-          <Header webroot={WEBROOT} allowUnauthenticated={ALLOW_UNAUTHENTICATED} loggedIn />
+          <Header
+            webroot={WEBROOT}
+            allowUnauthenticated={ALLOW_UNAUTHENTICATED}
+            loggedIn
+            userRole={getUserRole(user?.id)}
+          />
           <main
             class={`
               w-full flex-1 px-2

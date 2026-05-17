@@ -16,6 +16,7 @@ import {
 } from "../helpers/env";
 import { t as translate, detectLocale } from "../locales";
 import { sendVerificationCode, generateVerificationCode } from "../helpers/email";
+import { getUserRole } from "../helpers/userRole";
 
 export let FIRST_RUN = db.query("SELECT * FROM users").get() === null || false;
 
@@ -112,7 +113,11 @@ export const user = new Elysia()
                   />
                 </label>
               </fieldset>
-              <input type="submit" value={translate("auth.setup", userLocale)} class="btn-primary" />
+              <input
+                type="submit"
+                value={translate("auth.setup", userLocale)}
+                class="btn-primary"
+              />
             </form>
             <footer class="p-4">
               {translate("common.reportIssues", userLocale)}{" "}
@@ -132,13 +137,13 @@ export const user = new Elysia()
       </BaseHtml>
     );
   })
-  .get("/register", ({ redirect, headers, cookie: { locale } }) => {
+  .get("/register", ({ redirect, headers, query, cookie: { locale } }) => {
     const userLocale = detectLocale(headers["accept-language"], locale?.value);
     if (!ACCOUNT_REGISTRATION && !FIRST_RUN) {
       return redirect(`${WEBROOT}/login`, 302);
     }
 
-    const refCode = new URLSearchParams(headers["referer"]?.split("?")[1] ?? "").get("ref") ?? "";
+    const refCode = typeof query.ref === "string" ? query.ref : "";
 
     return (
       <BaseHtml webroot={WEBROOT} title="ConvertX | Register" locale={userLocale}>
@@ -157,7 +162,11 @@ export const user = new Elysia()
             `}
           >
             <article class="article">
-              <form method="post" action={`${WEBROOT}/verify-email/send`} class="flex flex-col gap-4">
+              <form
+                method="post"
+                action={`${WEBROOT}/verify-email/send`}
+                class="flex flex-col gap-4"
+              >
                 <fieldset class="mb-4 flex flex-col gap-4">
                   <label class="flex flex-col gap-1">
                     {translate("account.email", userLocale)}
@@ -191,7 +200,11 @@ export const user = new Elysia()
                     />
                   </label>
                 </fieldset>
-                <input type="submit" value={translate("nav.register", userLocale)} class="w-full btn-primary" />
+                <input
+                  type="submit"
+                  value={translate("nav.register", userLocale)}
+                  class="w-full btn-primary"
+                />
               </form>
             </article>
           </main>
@@ -223,7 +236,7 @@ export const user = new Elysia()
       const savedPassword = await Bun.password.hash(password);
 
       db.query(
-        "INSERT INTO users (email, password, credits, role, email_verified, referred_by, last_check_in) VALUES (?, ?, ?, ?, ?, NULL, NULL)"
+        "INSERT INTO users (email, password, credits, role, email_verified, referred_by, last_check_in) VALUES (?, ?, ?, ?, ?, NULL, NULL)",
       ).run(email, savedPassword, INITIAL_CREDITS, isAdmin ? "admin" : "user", 1);
 
       const user = db.query("SELECT * FROM users WHERE email = ?").as(User).get(email);
@@ -261,7 +274,7 @@ export const user = new Elysia()
   )
   .get(
     "/login",
-    async ({ jwt, redirect, cookie: { auth }, headers, cookie: { locale } }) => {
+    async ({ jwt, redirect, headers, cookie: { auth, locale } }) => {
       const userLocale = detectLocale(headers["accept-language"], locale?.value);
       if (FIRST_RUN) {
         return redirect(`${WEBROOT}/setup`, 302);
@@ -330,7 +343,11 @@ export const user = new Elysia()
                         {translate("nav.register", userLocale)}
                       </a>
                     ) : null}
-                    <input type="submit" value={translate("nav.login", userLocale)} class="w-full btn-primary" />
+                    <input
+                      type="submit"
+                      value={translate("nav.login", userLocale)}
+                      class="w-full btn-primary"
+                    />
                   </div>
                 </form>
               </article>
@@ -424,6 +441,7 @@ export const user = new Elysia()
               hideHistory={HIDE_HISTORY}
               loggedIn
               locale={userLocale}
+              userRole={getUserRole(user.id)}
             />
             <main
               class={`
@@ -469,7 +487,11 @@ export const user = new Elysia()
                     </label>
                   </fieldset>
                   <div role="group">
-                    <input type="submit" value={translate("account.update", userLocale)} class="w-full btn-primary" />
+                    <input
+                      type="submit"
+                      value={translate("account.update", userLocale)}
+                      class="w-full btn-primary"
+                    />
                   </div>
                 </form>
               </article>

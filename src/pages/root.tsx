@@ -14,6 +14,8 @@ import {
   UNAUTHENTICATED_USER_SHARING,
   WEBROOT,
 } from "../helpers/env";
+import { isReusableDraftJob } from "../helpers/jobs";
+import { getUserRole } from "../helpers/userRole";
 import { t as translate, detectLocale } from "../locales";
 import { FIRST_RUN, userService } from "./user";
 
@@ -83,22 +85,32 @@ export const root = new Elysia().use(userService).get(
       return redirect(`${WEBROOT}/login`, 302);
     }
 
-    // create a new job
-    db.query("INSERT INTO jobs (user_id, date_created) VALUES (?, ?)").run(
-      user.id,
-      new Date().toISOString(),
-    );
-
-    const { id } = db
-      .query("SELECT id FROM jobs WHERE user_id = ? ORDER BY id DESC")
-      .get(user.id) as { id: number };
-
     if (!jobId) {
       return { message: "Cookies should be enabled to use this app." };
     }
 
+    const reusableJob = jobId.value
+      ? (db
+          .query("SELECT id, num_files, status FROM jobs WHERE id = ? AND user_id = ?")
+          .get(jobId.value, user.id) as {
+          id: number;
+          num_files: number;
+          status: string | null;
+        } | null)
+      : null;
+    let id: number;
+    if (reusableJob && isReusableDraftJob(reusableJob)) {
+      id = reusableJob.id;
+    } else {
+      id = (
+        db
+          .query("INSERT INTO jobs (user_id, date_created) VALUES (?, ?) RETURNING id")
+          .get(user.id, new Date().toISOString()) as { id: number }
+      ).id;
+    }
+
     jobId.set({
-      value: id,
+      value: String(id),
       httpOnly: true,
       secure: !HTTP_ALLOWED,
       maxAge: 24 * 60 * 60,
@@ -117,6 +129,7 @@ export const root = new Elysia().use(userService).get(
             hideHistory={HIDE_HISTORY}
             loggedIn
             locale={userLocale}
+            userRole={getUserRole(user.id)}
           />
           <main
             class={`
@@ -147,7 +160,8 @@ export const root = new Elysia().use(userService).get(
                 `}
               >
                 <span>
-                  <b>{translate("home.chooseFile", userLocale)}</b> {translate("home.orDrag", userLocale)}
+                  <b>{translate("home.chooseFile", userLocale)}</b>{" "}
+                  {translate("home.orDrag", userLocale)}
                 </span>
                 <input
                   type="file"
@@ -213,7 +227,12 @@ export const root = new Elysia().use(userService).get(
                   </article>
 
                   {/* Hidden element which determines the format to convert the file too and the converter to use */}
-                  <select name="convert_to" aria-label={translate("home.convertTo", userLocale)} required hidden>
+                  <select
+                    name="convert_to"
+                    aria-label={translate("home.convertTo", userLocale)}
+                    required
+                    hidden
+                  >
                     <option selected disabled value="">
                       {translate("home.convertTo", userLocale)}
                     </option>

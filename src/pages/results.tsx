@@ -9,6 +9,7 @@ import { DownloadIcon } from "../icons/download";
 import { DeleteIcon } from "../icons/delete";
 import { EyeIcon } from "../icons/eye";
 import { userService } from "./user";
+import { getUserRole } from "../helpers/userRole";
 
 function ResultsArticle({
   job,
@@ -26,14 +27,16 @@ function ResultsArticle({
       <div class="mb-4 flex items-center justify-between">
         <h1 class="text-xl">{translate("results.title", locale)}</h1>
         <div class="flex flex-row gap-4">
-          <a
-            style={files.length !== job.num_files ? "pointer-events: none;" : ""}
-            class="flex btn-secondary flex-row gap-2 text-contrast"
-            href={`${WEBROOT}/delete/${job.id}`}
-            {...(files.length !== job.num_files ? { disabled: true, "aria-busy": "true" } : "")}
-          >
-            <DeleteIcon /> <p>{translate("results.delete", locale)}</p>
-          </a>
+          <form method="post" action={`${WEBROOT}/delete/${job.id}`}>
+            <button
+              style={files.length !== job.num_files ? "pointer-events: none;" : ""}
+              class="flex btn-secondary flex-row gap-2 text-contrast"
+              type="submit"
+              {...(files.length !== job.num_files ? { disabled: true, "aria-busy": "true" } : {})}
+            >
+              <DeleteIcon /> <p>{translate("results.delete", locale)}</p>
+            </button>
+          </form>
           <a
             style={files.length !== job.num_files ? "pointer-events: none;" : ""}
             href={`${WEBROOT}/archive/${job.id}`}
@@ -165,7 +168,13 @@ export const results = new Elysia()
       return (
         <BaseHtml webroot={WEBROOT} title="ConvertX | Result" locale={userLocale}>
           <>
-            <Header webroot={WEBROOT} allowUnauthenticated={ALLOW_UNAUTHENTICATED} loggedIn locale={userLocale} />
+            <Header
+              webroot={WEBROOT}
+              allowUnauthenticated={ALLOW_UNAUTHENTICATED}
+              loggedIn
+              locale={userLocale}
+              userRole={getUserRole(user.id)}
+            />
             <main
               class={`
                 w-full flex-1 px-2

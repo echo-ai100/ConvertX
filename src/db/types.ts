@@ -55,5 +55,6 @@ export class EmailVerificationCode {
   code!: string;
   expires_at!: string;
   verified!: number;
+  attempts!: number;
   date_created!: string;
 }

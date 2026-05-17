@@ -11,6 +11,15 @@ export const deleteJob = new Elysia()
   .use(userService)
   .get(
     "/delete/:jobId",
+    async ({ redirect }) => {
+      return redirect(`${WEBROOT}/history`, 302);
+    },
+    {
+      auth: true,
+    },
+  )
+  .post(
+    "/delete/:jobId",
     async ({ params, redirect, user }) => {
       const job = db
         .query("SELECT * FROM jobs WHERE user_id = ? AND id = ?")
@@ -32,6 +41,7 @@ export const deleteJob = new Elysia()
       });
 
       // delete the job
+      db.query("DELETE FROM file_names WHERE job_id = ?").run(job.id);
       db.query("DELETE FROM jobs WHERE id = ?").run(job.id);
       return redirect(`${WEBROOT}/history`, 302);
     },
@@ -91,6 +101,7 @@ export const deleteJob = new Elysia()
           }
 
           // Delete the job from database
+          db.query("DELETE FROM file_names WHERE job_id = ?").run(job.id);
           db.query("DELETE FROM jobs WHERE id = ?").run(job.id);
           results.success.push(jobId);
         } catch (error) {

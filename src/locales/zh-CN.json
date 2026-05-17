@@ -6,6 +6,7 @@
     "login": "登录",
     "register": "注册",
     "credits": "积分",
+    "recharge": "充值",
     "checkIn": "签到",
     "referral": "邀请",
     "admin": "管理"
@@ -114,5 +115,13 @@
     "recentUsers": "最近用户",
     "role": "角色",
     "noUsers": "暂无用户"
+  },
+  "recharge": {
+    "title": "充值",
+    "selectAmount": "选择充值金额",
+    "selectMethod": "选择支付方式",
+    "paymentHistory": "充值记录",
+    "paymentPending": "等待支付",
+    "backToRecharge": "返回充值"
   }
 }

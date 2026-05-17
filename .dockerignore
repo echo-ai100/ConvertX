@@ -11,6 +11,7 @@ CHANGELOG.md
 compose.yaml
 coverage*
 data
+dist
 docker-compose*
 Dockerfile*
 eslint.config.js

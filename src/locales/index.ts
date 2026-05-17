@@ -29,6 +29,7 @@ const enDefaults: Record<string, string> = {
   "nav.login": "Login",
   "nav.register": "Register",
   "nav.credits": "Credits",
+  "nav.recharge": "Recharge",
   "nav.checkIn": "Check In",
   "nav.referral": "Referral",
   "nav.admin": "Admin",
@@ -119,6 +120,12 @@ const enDefaults: Record<string, string> = {
   "admin.recentUsers": "Recent Users",
   "admin.role": "Role",
   "admin.noUsers": "No users yet",
+  "recharge.title": "Recharge",
+  "recharge.selectAmount": "Select Amount",
+  "recharge.selectMethod": "Select Payment Method",
+  "recharge.paymentHistory": "Payment History",
+  "recharge.paymentPending": "Payment Pending",
+  "recharge.backToRecharge": "Back to Recharge",
 };
 
 export function t(key: string, locale: string, vars?: Record<string, string | number>): string {

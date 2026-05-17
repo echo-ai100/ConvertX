@@ -30,11 +30,12 @@ CREATE TABLE IF NOT EXISTS jobs (
 PRAGMA user_version = 1;`);
 }
 
-const dbVersion = (db.query("PRAGMA user_version").get() as { user_version?: number }).user_version;
+let dbVersion = (db.query("PRAGMA user_version").get() as { user_version?: number }).user_version;
 if (dbVersion === 0) {
   db.exec("ALTER TABLE file_names ADD COLUMN status TEXT DEFAULT 'not started';");
   db.exec("PRAGMA user_version = 1;");
   console.log("Updated database to version 1.");
+  dbVersion = 1;
 }
 
 if (dbVersion === 1) {
@@ -77,6 +78,24 @@ if (dbVersion === 1) {
     PRAGMA user_version = 2;
   `);
   console.log("Updated database to version 2.");
+  dbVersion = 2;
+}
+
+if (dbVersion === 2) {
+  db.exec(`
+    ALTER TABLE email_verification_codes ADD COLUMN attempts INTEGER DEFAULT 0;
+    CREATE TABLE IF NOT EXISTS pending_registrations (
+      email TEXT PRIMARY KEY NOT NULL,
+      password_hash TEXT NOT NULL,
+      referral_code TEXT DEFAULT NULL,
+      expires_at TEXT NOT NULL,
+      date_created TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_file_names_job_id ON file_names(job_id);
+    PRAGMA user_version = 3;
+  `);
+  console.log("Updated database to version 3.");
+  dbVersion = 3;
 }
 
 // enable WAL mode

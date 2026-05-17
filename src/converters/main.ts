@@ -1,6 +1,7 @@
 import { Cookie } from "elysia";
 import db from "../db/db";
 import { MAX_CONVERT_PROCESS } from "../helpers/env";
+import { hasConversionFailures } from "../helpers/conversionStatus";
 import { normalizeFiletype, normalizeOutputFiletype } from "../helpers/normalizeFiletype";
 import { convert as convertassimp, properties as propertiesassimp } from "./assimp";
 import { convert as convertCalibre, properties as propertiesCalibre } from "./calibre";
@@ -160,6 +161,8 @@ export async function handleConvert(
     "INSERT INTO file_names (job_id, file_name, output_file_name, status) VALUES (?1, ?2, ?3, ?4)",
   );
 
+  const statuses: string[] = [];
+
   for (const chunk of chunks(fileNames, MAX_CONVERT_PROCESS)) {
     const toProcess: Promise<string>[] = [];
     for (const fileName of chunk) {
@@ -190,7 +193,11 @@ export async function handleConvert(
         }),
       );
     }
-    await Promise.all(toProcess);
+    statuses.push(...(await Promise.all(toProcess)));
+  }
+
+  if (hasConversionFailures(statuses)) {
+    throw new Error("One or more files failed to convert.");
   }
 }
 

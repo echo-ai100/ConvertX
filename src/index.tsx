@@ -21,6 +21,7 @@ import { healthcheck } from "./pages/healthcheck";
 import { locale } from "./pages/locale";
 import { emailVerification } from "./pages/emailVerification";
 import { credits } from "./pages/credits";
+import { recharge } from "./pages/recharge";
 import { checkIn } from "./pages/checkIn";
 import { referral } from "./pages/referral";
 import { admin } from "./pages/admin";
@@ -59,6 +60,7 @@ const app = new Elysia({
   .use(locale)
   .use(emailVerification)
   .use(credits)
+  .use(recharge)
   .use(checkIn)
   .use(referral)
   .use(admin)
@@ -99,6 +101,7 @@ const clearJobs = () => {
     });
 
     // delete the job
+    db.query("DELETE FROM file_names WHERE job_id = ?").run(job.id);
     db.query("DELETE FROM jobs WHERE id = ?").run(job.id);
   }
 
@@ -111,7 +114,10 @@ if (AUTO_DELETE_EVERY_N_HOURS > 0) {
 
 // Clear expired verification codes every hour
 const clearExpiredCodes = () => {
-  db.query("DELETE FROM email_verification_codes WHERE expires_at < ?").run(new Date().toISOString());
+  db.query("DELETE FROM email_verification_codes WHERE expires_at < ?").run(
+    new Date().toISOString(),
+  );
+  db.query("DELETE FROM pending_registrations WHERE expires_at < ?").run(new Date().toISOString());
   setTimeout(clearExpiredCodes, 60 * 60 * 1000);
 };
 clearExpiredCodes();
